@@ -140,7 +140,7 @@ hmac_init(hmac_ctx_t *state, const uint8_t *key, int key_len) {
   sha1_init(&state->init_ctx);
 
   /* hash ipad ^ key */
-  sha1_update(&state->init_ctx, ipad, 64);
+  srtp_sha1_update(&state->init_ctx, ipad, 64);
   memcpy(&state->ctx, &state->init_ctx, sizeof(sha1_ctx_t)); 
 
   return err_status_ok;
@@ -161,7 +161,7 @@ hmac_update(hmac_ctx_t *state, const uint8_t *message, int msg_octets) {
 	      octet_string_hex_string(message, msg_octets));
   
   /* hash message into sha1 context */
-  sha1_update(&state->ctx, message, msg_octets);
+  srtp_sha1_update(&state->ctx, message, msg_octets);
 
   return err_status_ok;
 }
@@ -192,10 +192,10 @@ hmac_compute(hmac_ctx_t *state, const void *message,
   sha1_init(&state->ctx);
   
   /* hash opad ^ key  */
-  sha1_update(&state->ctx, (uint8_t *)state->opad, 64);
+  srtp_sha1_update(&state->ctx, (uint8_t *)state->opad, 64);
 
   /* hash the result of the inner hash */
-  sha1_update(&state->ctx, (uint8_t *)H, 20);
+  srtp_sha1_update(&state->ctx, (uint8_t *)H, 20);
   
   /* the result is returned in the array hash_value[] */
   sha1_final(&state->ctx, hash_value);
