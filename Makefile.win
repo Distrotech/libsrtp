@@ -9,7 +9,7 @@
 # test		builds test applications
 # libcrypt.a	static library implementing crypto engine
 # libsrtp.a	static library implementing srtp
-# libsrtp.so	shared library implementing srtp
+# libsrtp.dll	shared library implementing srtp
 # clean		removes objects, libs, and executables
 # distribution  cleans and builds a .tgz
 # tags          builds etags file from all .c and .h files
@@ -33,41 +33,42 @@ runtest: build_table_apps test
 
 # makefile variables
 
-CC	= @CC@
+CC	= gcc
 INCDIR	= -Icrypto/include -I$(srcdir)/include -I$(srcdir)/crypto/include
-DEFS	= @DEFS@
-CPPFLAGS= @CPPFLAGS@
-CFLAGS	= @CFLAGS@
-LIBS	= @LIBS@
-LDFLAGS	= @LDFLAGS@ -L.
-COMPILE = $(CC) -fPIC $(DEFS) $(INCDIR) $(CPPFLAGS) $(CFLAGS)
+DEFS	= -DHAVE_CONFIG_H
+CPPFLAGS= 
+CFLAGS	= -Wall -O4 -fexpensive-optimizations -funroll-loops
+LIBS	= -lws2_32 -lwsock32
+LDFLAGS	=  -L.
+COMPILE = $(CC) $(DEFS) $(INCDIR) $(CPPFLAGS) $(CFLAGS)
 SRTPLIB	= -lsrtp
 
-RANLIB	= @RANLIB@
+RANLIB	= ranlib
 AR = ar
-INSTALL	= @INSTALL@
+INSTALL	= /usr/bin/ginstall -c
 
 # EXE defines the suffix on executables - it's .exe for Windows, and
 # null on linux, bsd, and OS X and other OSes.
-EXE	= @EXE@
+EXE	= .exe
 
-SHAREDLIB = libsrtp.so
+SHAREDLIB = libsrtp.dll
 
 # gdoi is the group domain of interpretation for isakmp, a group key
 # management system which can provide keys for srtp
-gdoi	= @GDOI_OBJS@
+gdoi	= 
 
 # Random source.
-RNG_OBJS = @RNG_OBJS@
+RNG_OBJS = rand_source.o
 
-srcdir = @srcdir@
-top_srcdir = @top_srcdir@
-top_builddir = @top_builddir@
-VPATH = @srcdir@
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-includedir = @includedir@
-libdir = @libdir@
+srcdir = ./..
+top_srcdir = ./..
+top_builddir = .
+VPATH = ./..
+prefix = /mingw
+exec_prefix = ${prefix}
+includedir = ${prefix}/include
+libdir = ${exec_prefix}/lib
+bindir = ${exec_prefix}/bin
 
 
 # implicit rules for object files and test apps
@@ -112,7 +113,7 @@ libsrtp.a: $(srtpobj) $(cryptobj) $(gdoi)
 	$(RANLIB) libsrtp.a
 
 $(SHAREDLIB): $(srtpobj) $(cryptobj) $(gdoi)
-	$(CC) -shared -o $@ $^
+	$(CC) -shared -o $@ -Wl,--out-implib,$(SHAREDLIB).a $^ $(LIBS)
 
 # libcryptomath.a contains general-purpose routines that are used to
 # generate tables and verify cryptoalgorithm implementations - this
@@ -203,11 +204,13 @@ install:
 	fi
 	$(INSTALL) -d $(DESTDIR)$(includedir)/srtp
 	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) -d $(DESTDIR)$(bindir)
 	cp $(srcdir)/include/*.h $(DESTDIR)$(includedir)/srtp  
 	cp $(srcdir)/crypto/include/*.h $(DESTDIR)$(includedir)/srtp
 	if [ "$(srcdir)" != "." ]; then cp crypto/include/*.h $(DESTDIR)$(includedir)/srtp; fi
 	if [ -f libsrtp.a ]; then cp libsrtp.a $(DESTDIR)$(libdir)/; fi
-	if [ -f $(SHAREDLIB) ]; then cp $(SHAREDLIB) $(DESTDIR)$(libdir)/; fi
+	if [ -f $(SHAREDLIB) ]; then cp $(SHAREDLIB) $(DESTDIR)$(bindir)/; fi
+	if [ -f $(SHAREDLIB).a ]; then cp $(SHAREDLIB) $(DESTDIR)$(libdir)/; fi
 
 uninstall:
 	rm -f $(DESTDIR)$(includedir)/srtp/*.h

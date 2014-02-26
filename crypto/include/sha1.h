@@ -70,7 +70,7 @@ sha1(const uint8_t *message,  int octets_in_msg, uint32_t output[5]);
 /*
  * sha1_init(&ctx) initializes the SHA1 context ctx
  * 
- * sha1_update(&ctx, msg, len) hashes the len octets starting at msg
+ * srtp_sha1_update(&ctx, msg, len) hashes the len octets starting at msg
  * into the SHA1 context
  * 
  * sha1_final(&ctx, output) performs the final processing of the SHA1
@@ -82,7 +82,7 @@ void
 sha1_init(sha1_ctx_t *ctx);
 
 void
-sha1_update(sha1_ctx_t *ctx, const uint8_t *M, int octets_in_msg);
+srtp_sha1_update(sha1_ctx_t *ctx, const uint8_t *M, int octets_in_msg);
 
 void
 sha1_final(sha1_ctx_t *ctx, uint32_t output[5]);
