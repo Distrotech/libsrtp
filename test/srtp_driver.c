@@ -338,7 +338,7 @@ main (int argc, char *argv[]) {
   if (do_codec_timing) {
     srtp_policy_t policy;
     int ignore;
-    double mips = mips_estimate(1000000000, &ignore);
+    double srtp_mips = mips_estimate(1000000000, &ignore);
 
     crypto_policy_set_rtp_default(&policy.rtp);
     crypto_policy_set_rtcp_default(&policy.rtcp);
@@ -350,7 +350,7 @@ main (int argc, char *argv[]) {
     policy.allow_repeat_tx = 0;
     policy.next = NULL;
 
-    printf("mips estimate: %e\n", mips);
+    printf("mips estimate: %e\n", srtp_mips);
 
     printf("testing srtp processing time for voice codecs:\n");
     printf("codec\t\tlength (octets)\t\tsrtp instructions/second\n");
